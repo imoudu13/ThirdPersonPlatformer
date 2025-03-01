@@ -43,10 +43,20 @@ public class PlayerMovement : MonoBehaviour
         float h = Input.GetAxis("Horizontal");
         float v = Input.GetAxis("Vertical");
 
-        Vector3 moveDir = cameraTransform.forward * v + cameraTransform.right * h;
-        moveDir.y = 0;  // Prevent vertical movement
+        // Get the camera's forward direction, ignoring vertical tilt
+        Vector3 cameraForward = cameraTransform.forward;
+        cameraForward.y = 0; // Ignore up/down tilt
+        cameraForward.Normalize(); // Keep movement smooth
+
+        Vector3 cameraRight = cameraTransform.right;
+        cameraRight.y = 0;
+        cameraRight.Normalize();
+
+        // Move relative to the camera
+        Vector3 moveDir = (cameraForward * v + cameraRight * h).normalized;
         rb.MovePosition(rb.position + moveDir * moveSpeed * Time.deltaTime);
     }
+
 
     void Jump()
     {
