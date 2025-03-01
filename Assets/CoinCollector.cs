@@ -2,15 +2,15 @@ using UnityEngine;
 
 public class CoinCollector : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    public static int score = 0;
 
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter(Collider other)
     {
-        
+        if (other.CompareTag("Player"))
+        {
+            score++;
+            Debug.Log("Score: " + score);
+            Destroy(gameObject);
+        }
     }
 }
