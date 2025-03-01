@@ -1,18 +1,21 @@
+using System.Collections;
 using UnityEngine;
+using TMPro;
 
-public class NewMonoBehaviourScript : MonoBehaviour
+public class PlayerMovement : MonoBehaviour
 {
-    [SerializeField] public float speed = 5f;
-    [SerializeField] public float dashSpeed = 10f;
-    [SerializeField] public float dashDuration = 0.5f;
-    [SerializeField] public float jumpForce = 10f;
-    
+    public float moveSpeed = 5f;
+    public float jumpForce = 7f;
+    public float dashSpeedMultiplier = 2f;
+    public float dashDuration = 0.5f;
     public Transform cameraTransform;
+    public TextMeshProUGUI scoreText;
 
     private Rigidbody rb;
     private bool isGrounded;
     private int jumpCount = 0;
-    private int maxJumpCount = 2; // this is so the player can double jump
+    private int maxJumps = 2; // For double jump
+    private bool isDashing = false;
 
     void Start()
     {
@@ -23,6 +26,16 @@ public class NewMonoBehaviourScript : MonoBehaviour
     {
         Move();
         Jump();
+        if (Input.GetKeyDown(KeyCode.LeftShift) && !isDashing)
+        {
+            StartCoroutine(Dash());
+        }
+
+        // Update UI
+        if (scoreText != null)
+        {
+            scoreText.text = "Score: " + CoinCollector.score;
+        }
     }
 
     void Move()
@@ -32,16 +45,28 @@ public class NewMonoBehaviourScript : MonoBehaviour
 
         Vector3 moveDir = cameraTransform.forward * v + cameraTransform.right * h;
         moveDir.y = 0;  // Prevent vertical movement
-        rb.MovePosition(rb.position + moveDir * speed * Time.deltaTime);
+        rb.MovePosition(rb.position + moveDir * moveSpeed * Time.deltaTime);
     }
 
     void Jump()
     {
-        if (jumpCount < maxJumpCount && Input.GetKeyDown(KeyCode.Space))
+        if (jumpCount < maxJumps && Input.GetKeyDown(KeyCode.Space))
         {
             rb.linearVelocity = new Vector3(rb.linearVelocity.x, jumpForce, rb.linearVelocity.z);
             jumpCount++;
         }
+    }
+
+    IEnumerator Dash()
+    {
+        isDashing = true;
+        float originalSpeed = moveSpeed;
+        moveSpeed *= dashSpeedMultiplier; // Increase speed
+
+        yield return new WaitForSeconds(dashDuration);
+
+        moveSpeed = originalSpeed; // Reset speed
+        isDashing = false;
     }
 
     private void OnCollisionEnter(Collision collision)
